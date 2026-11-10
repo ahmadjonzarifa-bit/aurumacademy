@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aurum Academy — Доступное образование и учебное сообщество</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            aurum: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              200: '#fde68a',
+              300: '#fcd34d',
+              400: '#fbbf24',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309',
+              800: '#92400e',
+              900: '#78350f',
+            },
+            navy: {
+              50: '#f0f4f8',
+              100: '#d9e2ec',
+              700: '#1e293b',
+              800: '#0f172a',
+              900: '#090d16',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Подключение таблицы стилей style.css -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-amber-200 selection:text-slate-900">
+
+  <!-- ВЕРХНЯЯ ПАНЕЛЬ СИМУЛЯЦИИ РОЛЕЙ И МАРШРУТА (Для тестирования RBAC и CRUD из PRD) -->
+  <div class="bg-slate-900 text-slate-200 text-xs border-b border-slate-800 px-3 py-2">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">
+          <i class="fa-solid fa-shield-halved"></i> RBAC & CRUD Консоль
+        </span>
+        <span class="text-slate-400 hidden sm:inline">Маршрут:</span>
+        <code id="route-indicator" class="px-2 py-0.5 rounded bg-slate-800 text-amber-400 font-mono text-xs">/</code>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-slate-400">Быстрое переключение роли (PRD п.3):</span>
+        <div class="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700" role="group" aria-label="Выбор роли">
+          <button onclick="app.switchRole('guest')" id="role-btn-guest" class="px-2.5 py-1 rounded-md text-xs font-medium transition">Гость</button>
+          <button onclick="app.switchRole('user')" id="role-btn-user" class="px-2.5 py-1 rounded-md text-xs font-medium transition">Ученик</button>
+          <button onclick="app.switchRole('editor')" id="role-btn-editor" class="px-2.5 py-1 rounded-md text-xs font-medium transition">Редактор</button>
+          <button onclick="app.switchRole('moderator')" id="role-btn-moderator" class="px-2.5 py-1 rounded-md text-xs font-medium transition">Модератор</button>
+          <button onclick="app.switchRole('admin')" id="role-btn-admin" class="px-2.5 py-1 rounded-md text-xs font-medium transition">Админ</button>
+        </div>
+        <button onclick="app.openCodeExportModal()" class="px-2.5 py-1 rounded-md bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-medium transition flex items-center gap-1" title="Скачать 3 файла: index.html, style.css, script.js">
+          <i class="fa-solid fa-file-code"></i> <span>3 файла</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНАЯ НАВИГАЦИЯ -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <!-- Логотип -->
+      <div class="flex items-center gap-6">
+        <button onclick="app.navigate('/')" class="flex items-center gap-2.5 text-left group">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-extrabold text-lg shadow-sm group-hover:scale-105 transition">
+            Au
+          </div>
+          <div>
+            <div class="font-extrabold text-lg tracking-tight text-slate-900 leading-none flex items-center gap-1.5">
+              Aurum <span class="text-amber-600">Academy</span>
+            </div>
+            <div class="text-[11px] text-slate-500 font-medium">Узбекистан • Единая среда обучения</div>
+          </div>
+        </button>
+
+        <!-- Основное меню -->
+        <nav class="hidden md:flex items-center gap-1" aria-label="Основная навигация">
+          <button onclick="app.navigate('/')" data-nav="/" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Главная</button>
+          <button onclick="app.navigate('/courses')" data-nav="/courses" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Курсы</button>
+          <button onclick="app.navigate('/library')" data-nav="/library" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Библиотека</button>
+          <button onclick="app.navigate('/studio')" data-nav="/studio" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition flex items-center gap-1.5"><i class="fa-solid fa-wand-magic-sparkles text-amber-500"></i><span>Студия</span></button>
+          <button onclick="app.navigate('/community')" data-nav="/community" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">Сообщество</button>
+          <button onclick="app.navigate('/about')" data-nav="/about" class="nav-link px-3 py-2 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition">О проекте & PRD</button>
+        </nav>
+      </div>
+
+      <!-- Правая часть шапки: Кабинет / Админка / Вход / Тема -->
+      <div class="flex items-center gap-2">
+        <button onclick="app.toggleTheme()" id="theme-toggle-btn" class="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Переключить тему (Светлая / Тёмная)" aria-label="Переключить тему">
+          <i class="fa-solid fa-moon"></i>
+        </button>
+        <div id="header-user-area" class="flex items-center gap-2"></div>
+      </div>
+    </div>
+
+    <!-- Мобильная навигация -->
+    <div class="md:hidden border-t border-slate-100 dark:border-slate-800 px-3 py-1.5 flex items-center justify-around bg-slate-50 dark:bg-slate-900 text-xs overflow-x-auto">
+      <button onclick="app.navigate('/')" class="px-2.5 py-1.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 whitespace-nowrap"><i class="fa-solid fa-house mr-1"></i>Главная</button>
+      <button onclick="app.navigate('/courses')" class="px-2.5 py-1.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 whitespace-nowrap"><i class="fa-solid fa-graduation-cap mr-1"></i>Курсы</button>
+      <button onclick="app.navigate('/library')" class="px-2.5 py-1.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 whitespace-nowrap"><i class="fa-solid fa-book-open mr-1"></i>Библиотека</button>
+      <button onclick="app.navigate('/studio')" class="px-2.5 py-1.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 whitespace-nowrap"><i class="fa-solid fa-wand-magic-sparkles mr-1 text-amber-500"></i>Студия</button>
+      <button onclick="app.navigate('/community')" class="px-2.5 py-1.5 rounded-lg font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 whitespace-nowrap"><i class="fa-solid fa-comments mr-1"></i>Сообщество</button>
+    </div>
+  </header>
+
+  <!-- ОСНОВНОЙ КОНТЕЙНЕР СТРАНИЦ -->
+  <main id="app-root" class="flex-1"></main>
+
+  <!-- FOOTER (PRD 6.1 п.12) -->
+  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 mt-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div>
+          <div class="flex items-center gap-2.5 mb-3">
+            <div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-extrabold text-sm">Au</div>
+            <span class="font-bold text-white text-lg">Aurum Academy</span>
+          </div>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Доступная образовательная платформа и учебное сообщество для школьников, абитуриентов, студентов и начинающих специалистов Узбекистана.
+          </p>
+          <div class="mt-4 flex items-center gap-2 text-xs text-amber-400 font-medium">
+            <i class="fa-solid fa-database"></i> CRUD-first MVP v1.0 • Локальная СУБД
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-3">Обучение</h4>
+          <ul class="space-y-2 text-sm">
+            <li><button onclick="app.navigate('/courses')" class="hover:text-amber-400 transition">Каталог курсов</button></li>
+            <li><button onclick="app.navigate('/library')" class="hover:text-amber-400 transition">Библиотека материалов</button></li>
+            <li><button onclick="app.navigate('/studio')" class="hover:text-amber-400 transition">Студия (Карты, Тесты, Карточки)</button></li>
+            <li><button onclick="app.navigate('/community')" class="hover:text-amber-400 transition">Учебное сообщество</button></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-3">Личный кабинет</h4>
+          <ul class="space-y-2 text-sm">
+            <li><button onclick="app.navigate('/dashboard')" class="hover:text-amber-400 transition">Дашборд прогресса</button></li>
+            <li><button onclick="app.navigate('/my-courses')" class="hover:text-amber-400 transition">Мои курсы</button></li>
+            <li><button onclick="app.navigate('/my-results')" class="hover:text-amber-400 transition">Результаты тестов</button></li>
+            <li><button onclick="app.navigate('/saved')" class="hover:text-amber-400 transition">Избранные материалы</button></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-white font-semibold text-sm uppercase tracking-wider mb-3">Управление и Политики</h4>
+          <ul class="space-y-2 text-sm">
+            <li><button onclick="app.navigate('/about')" class="hover:text-amber-400 transition">О проекте и матрица CRUD</button></li>
+            <li><button onclick="app.navigate('/admin')" class="hover:text-amber-400 transition">Панель администратора</button></li>
+            <li><button onclick="app.openCodeExportModal()" class="hover:text-amber-400 transition">Экспорт 3 файлов (HTML/CSS/JS)</button></li>
+            <li><button onclick="app.confirmResetDatabase()" class="text-rose-400 hover:text-rose-300 transition">Сбросить демо-базу данных</button></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+        <div>© 2025 Aurum Academy (Узбекистан). Все базовые образовательные функции бесплатны.</div>
+        <div class="flex items-center gap-4">
+          <button onclick="app.showPolicyModal('safety')" class="hover:text-slate-300">Правила безопасности</button>
+          <button onclick="app.showPolicyModal('privacy')" class="hover:text-slate-300">Конфиденциальность</button>
+          <button onclick="app.showPolicyModal('licenses')" class="hover:text-slate-300">Лицензии OER</button>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- МОДАЛЬНОЕ ОКНО (Универсальное для CRUD-форм и подтверждений без alert/confirm) -->
+  <div id="modal-backdrop" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
+    <div id="modal-content" class="bg-white rounded-2xl shadow-2xl border border-slate-200 max-w-2xl w-full overflow-hidden my-8 fade-enter"></div>
+  </div>
+
+  <!-- КОНТЕЙНЕР УВЕДОМЛЕНИЙ (Toast notifications) -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- Подключение скрипта логики script.js -->
+  <script src="script.js"></script>
+</body>
+</html>
